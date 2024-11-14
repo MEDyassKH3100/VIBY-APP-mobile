@@ -17,6 +17,22 @@ export class MailService {
     });
   }
 
+  async sendVerificationEmail(email: string, token: string) {
+    const verificationUrl = `http://localhost:3000/auth/verify/${token}`;
+    const html = `
+      <h1>Email Verification</h1>
+      <p>Please click the link below to verify your email:</p>
+      <a href="${verificationUrl}">${verificationUrl}</a>
+    `;
+
+    await this.transporter.sendMail({
+      from: 'Auth-backend service <chatesprit3@gmail.com>',
+      to: email,
+      subject: 'Verify Your Email',
+      html: html
+    });
+  }
+
   async sendOtpEmail(to: string, otp: number) {
     const htmlTemplate = `
       <h1>Réinitialisation de mot de passe - OTP</h1>

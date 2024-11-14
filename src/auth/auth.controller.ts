@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dtos/signup.dto';
 import { LoginDto } from './dtos/login.dto';
@@ -16,6 +16,12 @@ export class AuthController {
   async signUp(@Body() signupData: SignupDto) {
     return this.authService.signup(signupData);
   }
+
+
+  @Get('verify/:token')
+async verifyEmail(@Param('token') token: string) {
+  return this.authService.verifyEmail(token);
+}
 
   @Post('login')
   async login(@Body() credentials: LoginDto) {

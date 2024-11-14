@@ -24,6 +24,16 @@ export class User extends Document {
 
   @Prop({ default: false })
   otpVerified: boolean;
+
+  @Prop()
+  verificationToken: string;
+
+  @Prop()
+  verificationExpire: Date;
+
+  @Prop({ default: false })
+  isVerified: boolean;
+  
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

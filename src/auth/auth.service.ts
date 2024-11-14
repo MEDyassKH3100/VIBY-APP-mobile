@@ -32,28 +32,51 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private rolesService: RolesService,
+
   ) {}
 
-  async signup(signupData: SignupDto) {
+   async signup(signupData: SignupDto): Promise<any> {
     const { email, password, fullname } = signupData;
-
-    //Check if email is in use
-    const emailInUse = await this.UserModel.findOne({
-      email,
-    });
-    if (emailInUse) {
+    const userExists = await this.UserModel.findOne({ email });
+    if (userExists) {
       throw new BadRequestException('Email already in use');
     }
-    //Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = nanoid();
+    const verificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Create user document and save in mongodb
-    return await this.UserModel.create({
+    const newUser = await this.UserModel.create({
       fullname,
       email,
       password: hashedPassword,
+      verificationToken,
+      verificationExpire
     });
+
+    await this.mailService.sendVerificationEmail(email, verificationToken);
+    return { message: 'User registered, please check your email to verify your account.' };
   }
+
+  async verifyEmail(token: string): Promise<any> {
+    const user = await this.UserModel.findOne({
+      verificationToken: token,
+      verificationExpire: { $gt: new Date() }
+    });
+
+    if (!user) {
+      throw new BadRequestException('Verification token is invalid or has expired');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationExpire = undefined;
+    await user.save();
+
+    return { message: 'Email verified successfully' };
+  }
+
+
+
 
   async login(credentials: LoginDto) {
     const { email, password } = credentials;
