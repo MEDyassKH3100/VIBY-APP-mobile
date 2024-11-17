@@ -32,10 +32,9 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private rolesService: RolesService,
-
   ) {}
 
-   async signup(signupData: SignupDto): Promise<any> {
+  async signup(signupData: SignupDto): Promise<any> {
     const { email, password, fullname } = signupData;
     const userExists = await this.UserModel.findOne({ email });
     if (userExists) {
@@ -50,21 +49,29 @@ export class AuthService {
       email,
       password: hashedPassword,
       verificationToken,
-      verificationExpire
+      verificationExpire,
     });
 
     await this.mailService.sendVerificationEmail(email, verificationToken);
-    return { message: 'User registered, please check your email to verify your account.' };
+    return {
+      message:
+        'User registered, please check your email to verify your account.',
+    };
   }
 
   async verifyEmail(token: string): Promise<any> {
     const user = await this.UserModel.findOne({
       verificationToken: token,
-      verificationExpire: { $gt: new Date() }
+      verificationExpire: { $gt: new Date() },
     });
 
     if (!user) {
-      throw new BadRequestException('Verification token is invalid or has expired');
+      return `<html>
+      <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
+        <h1>Verification Failed</h1>
+        <p>The verification link is invalid or has expired.</p>
+      </body>
+    </html>`;
     }
 
     user.isVerified = true;
@@ -72,27 +79,52 @@ export class AuthService {
     user.verificationExpire = undefined;
     await user.save();
 
-    return { message: 'Email verified successfully' };
+    return `<html>
+            <head>
+              <title>Email Verified</title>
+              <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+                .verified { color: #4CAF50; margin: 20px; }
+                .info { color: #888; margin-bottom: 20px; }
+                a.button {
+                  padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none;
+                  border-radius: 5px; transition: background-color 0.3s;
+                }
+                a.button:hover { background-color: #45a049; }
+              </style>
+            </head>
+            <body>
+              <h1 class="verified">Email Verified Successfully!</h1>
+              <p class="info">You can now continue using the application.</p>
+              <a href="http://localhost:3000/auth/login" class="button">Sign In</a>
+            </body>
+          </html>`;
   }
-
-
-
 
   async login(credentials: LoginDto) {
     const { email, password } = credentials;
-    //Find if user exists by email
+
+    // Find if user exists by email
     const user = await this.UserModel.findOne({ email });
     if (!user) {
-      throw new UnauthorizedException('Wrong credentials');
+      throw new UnauthorizedException('Wrong email');
     }
 
-    //Compare entered password with existing password
+    // Check if the user's email has been verified
+    if (!user.isVerified) {
+      throw new UnauthorizedException(
+        'Email has not been verified. Please check your email to verify your account.',
+      );
+    }
+
+    // Compare entered password with existing password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw new UnauthorizedException('Wrong credentials');
+      throw new UnauthorizedException('Wrong password');
     }
 
-    //Generate JWT tokens
+    // If password matches and email is verified, proceed with generating tokens or whatever the next step is
+    // Generate JWT tokens or perform other sign-in logic
     const tokens = await this.generateUserTokens(user._id);
     return {
       ...tokens,
@@ -210,7 +242,6 @@ export class AuthService {
     const role = await this.rolesService.getRoleById(user.roleId.toString());
     return role.permissions;
   }
-  
 
   async getUserProfile(userId: string) {
     const user = await this.UserModel.findById(userId).select('-password'); // Exclure le mot de passe
@@ -219,83 +250,77 @@ export class AuthService {
     }
     return user;
   }
-  async updateProfile(userId: string, editProfileDto: EditProfileDto): Promise<User> {
+  async updateProfile(
+    userId: string,
+    editProfileDto: EditProfileDto,
+  ): Promise<User> {
     const user = await this.UserModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-  
+
     if (editProfileDto.email) {
       user.email = editProfileDto.email;
     }
     if (editProfileDto.fullname) {
       user.fullname = editProfileDto.fullname;
     }
-  
+
     await user.save();
     return user;
   }
-
 
   async forgotPassword(email: string) {
     const user = await this.UserModel.findOne({ email });
     if (!user) {
       throw new NotFoundException('User not found.');
     }
-  
+
     const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
     const otpExpire = new Date();
     otpExpire.setMinutes(otpExpire.getMinutes() + 10); // OTP expires in 10 minutes
-  
+
     user.otp = otp.toString();
     user.otpExpire = otpExpire;
     await user.save();
-  
+
     await this.mailService.sendOtpEmail(email, otp);
-  
-    return { message: "An OTP has been sent to your email." };
+
+    return { message: 'An OTP has been sent to your email.' };
   }
-  
 
   async verifyOtp(otp: number) {
     const user = await this.UserModel.findOne({
       otp,
-      otpExpire: { $gte: new Date() }
+      otpExpire: { $gte: new Date() },
     });
-  
+
     if (!user) {
       throw new BadRequestException('OTP is invalid or has expired.');
     }
-  
+
     user.otpVerified = true;
     user.otp = null; // Clear the OTP once verified
     user.otpExpire = null;
     await user.save();
-  
-    return { message: "OTP verified successfully.", userId: user._id };
-  }
-  
-  
 
+    return { message: 'OTP verified successfully.', userId: user._id };
+  }
 
   async resetPassword(userId: string, newPassword: string) {
     const user = await this.UserModel.findOne({
       _id: userId,
-      otpVerified: true
+      otpVerified: true,
     });
-  
+
     if (!user) {
-      throw new UnauthorizedException("OTP verification required.");
+      throw new UnauthorizedException('OTP verification required.');
     }
-  
+
     user.password = await bcrypt.hash(newPassword, 10);
     user.otpVerified = false; // Reset the flag
     await user.save();
-  
-    return { message: "Your password has been successfully reset." };
+
+    return { message: 'Your password has been successfully reset.' };
   }
-  
-
-
-
 }

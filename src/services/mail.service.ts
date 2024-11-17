@@ -20,10 +20,10 @@ export class MailService {
   async sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `http://localhost:3000/auth/verify/${token}`;
     const html = `
-      <h1>Email Verification</h1>
-      <p>Please click the link below to verify your email:</p>
-      <a href="${verificationUrl}">${verificationUrl}</a>
-    `;
+       <h1>Email Verification</h1>
+    <p>Please click the button below to verify your email:</p>
+    <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">Verify Email</a>
+  `;
 
     await this.transporter.sendMail({
       from: 'Auth-backend service <chatesprit3@gmail.com>',
