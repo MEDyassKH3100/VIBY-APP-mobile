@@ -6,7 +6,6 @@ import { RefreshTokenDto } from './dtos/refresh-tokens.dto';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { EditProfileDto } from './dtos/edit-profile.dto';
-import { VerifyOtpDto } from './dtos/verify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
