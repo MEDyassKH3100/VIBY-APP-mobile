@@ -1,0 +1,57 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+
+import { PostService } from './post.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { AuthenticationGuard } from 'src/guards/authentication.guard';
+
+@UseGuards(AuthenticationGuard) // Use JWT guard to secure the routes
+@Controller('post')
+export class PostController {
+  constructor(private readonly postsService: PostService) {}
+
+  @Post()
+  create(@Body() createPostDto: CreatePostDto, @Request() req) {
+    return this.postsService.create(createPostDto, req.user);
+  }
+
+  @Get()
+  findAll(@Request() req) {
+    return this.postsService.findAll(req.user);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string, @Request() req) {
+    console.log(id); // Add this to debug and see what ID is being passed
+    return this.postsService.findOne(id, req.user);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+    @Request() req,
+  ) {
+    return this.postsService.update(id, updatePostDto, req.user);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @Request() req) {
+    return this.postsService.remove(id, req.user);
+  }
+
+  @Delete()
+  removeAll(@Request() req) {
+    return this.postsService.removeAll(req.user);
+  }
+}

@@ -6,6 +6,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RolesModule } from './roles/roles.module';
+import { PostModule } from './post/post.module';
+import { CommentaieModule } from './commentaie/commentaie.module';
+import { ProjetModule } from './projet/projet.module';
+import { MediaModule } from './media/media.module';
+import { MorceauxModule } from './morceaux/morceaux.module';
 import config from './config/config';
 
 @Module({
@@ -32,6 +37,12 @@ import config from './config/config';
     }),
     AuthModule,
     RolesModule,
+    PostModule,
+    CommentaieModule,
+    ProjetModule,
+    MediaModule,
+    MorceauxModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],
