@@ -1,22 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
-
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
 
-@UseGuards(AuthenticationGuard) // Use JWT guard to secure the routes
-@Controller('post')
+@UseGuards(AuthenticationGuard) // Ensures only authenticated users can access these routes
+@Controller('posts')
 export class PostController {
   constructor(private readonly postsService: PostService) {}
 
@@ -32,16 +21,11 @@ export class PostController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
-    console.log(id); // Add this to debug and see what ID is being passed
     return this.postsService.findOne(id, req.user);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePostDto: UpdatePostDto,
-    @Request() req,
-  ) {
+  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto, @Request() req) {
     return this.postsService.update(id, updatePostDto, req.user);
   }
 
