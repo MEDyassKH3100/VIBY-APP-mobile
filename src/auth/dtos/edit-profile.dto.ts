@@ -8,4 +8,8 @@ export class EditProfileDto {
   @IsOptional()
   @IsEmail()
   readonly email?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string; // Mark image as optional
 }

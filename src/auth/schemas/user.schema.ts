@@ -33,6 +33,8 @@ export class User extends Document {
 
   @Prop({ default: false })
   isVerified: boolean;
+  @Prop()
+  image : string
   
 }
 
