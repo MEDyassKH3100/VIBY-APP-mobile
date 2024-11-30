@@ -17,8 +17,8 @@ export class Post extends Document {
   @Prop({ type: String }) // URL du fichier audio
   audioUrl?: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  user: User;
+ // @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  //user: User;
 
   @Prop({ default: Date.now }) // Date de création
   createdAt: Date;
