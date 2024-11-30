@@ -12,6 +12,8 @@ import { ProjetModule } from './projet/projet.module';
 import { MediaModule } from './media/media.module';
 import { MorceauxModule } from './morceaux/morceaux.module';
 import config from './config/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -42,6 +44,10 @@ import config from './config/config';
     ProjetModule,
     MediaModule,
     MorceauxModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Répertoire racine des fichiers statiques
+      serveRoot: '/uploads/', // Préfixe pour accéder aux fichiers
+    }),
     
   ],
   controllers: [AppController],

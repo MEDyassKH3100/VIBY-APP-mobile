@@ -17,6 +17,7 @@ export class PostService {
     return newPost.save();
   }
   
+  
 
   async findAll(user: any): Promise<Post[]> {
     return this.postModel.find({ user: user._id }).sort({ createdAt: -1 });

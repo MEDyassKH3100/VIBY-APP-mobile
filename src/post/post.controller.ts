@@ -33,7 +33,7 @@ export class PostController {
   ) {
     if (file) {
       if (file.mimetype.startsWith('video/')) {
-        createPostDto.videoUrl = `uploads/posts/${file.filename}`;
+        createPostDto.videoUrl = `${req.protocol}://${req.get('host')}/uploads/posts/${file.filename}`;
       } else if (file.mimetype.startsWith('audio/')) {
         createPostDto.audioUrl = `uploads/posts/${file.filename}`;
       }
@@ -53,6 +53,7 @@ export class PostController {
     return this.postsService.findAll(req.user);
   }
 
+  
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
     return this.postsService.findOne(id, req.user);
