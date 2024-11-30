@@ -12,14 +12,16 @@ export class PostService {
   async create(createPostDto: CreatePostDto, user: any) {
     const newPost = new this.postModel({
       ...createPostDto,
-      user: user._id
+      user: user._id,
     });
     return newPost.save();
   }
+  
 
   async findAll(user: any): Promise<Post[]> {
-    return this.postModel.find({ user: user._id });
+    return this.postModel.find({ user: user._id }).sort({ createdAt: -1 });
   }
+  
 
   async findOne(id: string, user: any): Promise<Post> {
     return this.postModel.findOne({ _id: id, user: user._id });

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
@@ -8,4 +8,12 @@ export class CreatePostDto {
   readonly content: string;
 
   readonly userId: string;
+
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  audioUrl?: string;
 }
