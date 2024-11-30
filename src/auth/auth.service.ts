@@ -57,48 +57,82 @@ export class AuthService {
     return { message: 'User registered, please check your email to verify your account.' };
   }
 
-  async verifyEmail(token: string): Promise<any> {
+  async verifyEmail(token: string): Promise<string> { // Notice return type is now string to return HTML content
     const user = await this.UserModel.findOne({
       verificationToken: token,
       verificationExpire: { $gt: new Date() }
     });
-
+  
     if (!user) {
-      throw new BadRequestException('Verification token is invalid or has expired');
+      return `<html>
+                <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
+                  <h1>Verification Failed</h1>
+                  <p>The verification link is invalid or has expired.</p>
+                </body>
+              </html>`;
     }
-
+  
     user.isVerified = true;
     user.verificationToken = undefined;
     user.verificationExpire = undefined;
     await user.save();
-
-    return { message: 'Email verified successfully' };
+  
+    // Return HTML content
+    return `<html>
+              <head>
+                <title>Email Verified</title>
+                <style>
+                  body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+                  .verified { color: #4CAF50; margin: 20px; }
+                  .info { color: #888; margin-bottom: 20px; }
+                  a.button {
+                    padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none;
+                    border-radius: 5px; transition: background-color 0.3s;
+                  }
+                  a.button:hover { background-color: #45a049; }
+                </style>
+              </head>
+              <body>
+                <h1 class="verified">Email Verified Successfully!</h1>
+                <p class="info">You can now continue using the application.</p>
+                <a href="http://yourapp.com/signin" class="button">Sign In</a>
+              </body>
+            </html>`;
   }
+  
 
 
 
 
   async login(credentials: LoginDto) {
     const { email, password } = credentials;
-    //Find if user exists by email
+    
+    // Find if user exists by email
     const user = await this.UserModel.findOne({ email });
     if (!user) {
       throw new UnauthorizedException('Wrong credentials');
     }
 
-    //Compare entered password with existing password
+    // Check if the user's email has been verified
+    if (!user.isVerified) {
+      throw new UnauthorizedException('Email has not been verified. Please check your email to verify your account.');
+    }
+
+    // Compare entered password with existing password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong credentials');
     }
 
-    //Generate JWT tokens
+    // If password matches and email is verified, proceed with generating tokens or whatever the next step is
+    // Generate JWT tokens or perform other sign-in logic
     const tokens = await this.generateUserTokens(user._id);
     return {
       ...tokens,
       userId: user._id,
     };
-  }
+}
+
 
   async changePassword(userId, oldPassword: string, newPassword: string) {
     //Find the user
