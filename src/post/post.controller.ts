@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UploadedFile, UseInterceptors, Res, NotFoundException } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -48,16 +48,43 @@ export class PostController {
     return res.sendFile(filePath); // Envoie le fichier en réponse
   }
 
-  @Get()
-  findAll(@Request() req) {
-    return this.postsService.findAll(req.user);
+ 
+
+  @Get('my-posts')
+  async findMyPosts(@Request() req) {
+    // L'utilisateur connecté est attaché à `req.user` par le middleware.
+    return this.postsService.findAllMyPosts(req.user);
+  }
+  
+  @Get('my-posts/:id')
+  async findOnePost(@Param('id') id: string, @Request() req) {
+    // Récupérer un post spécifique par ID et s'assurer que l'utilisateur est le propriétaire.
+    const post = await this.postsService.findOneOfMyPost(id, req.user);
+    if (!post) {
+      throw new NotFoundException('Post not found or you do not have permission to view it.');
+    }
+    return post;
   }
 
   
-  @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.postsService.findOne(id, req.user);
+  
+  // Route pour afficher tous les posts de la base de données
+  @Get('all')
+  async findAllPublic() {
+    const posts = await this.postsService.findAllPublic();
+    return posts;
   }
+
+  // Route pour afficher un post spécifique par son ID
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const post = await this.postsService.findOnePublic(id);
+    if (!post) {
+      throw new NotFoundException('Post not found.');
+    }
+    return post;
+  }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto, @Request() req) {
