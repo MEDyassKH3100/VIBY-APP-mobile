@@ -7,7 +7,9 @@ import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostService {
- constructor(@InjectModel(Post.name) private readonly postModel: Model<Post>) {}
+  constructor(
+    @InjectModel(Post.name) private readonly postModel: Model<Post>,
+  ) {}
 
   async create(createPostDto: CreatePostDto, user: any): Promise<Post> {
     const newPost = new this.postModel({
@@ -16,20 +18,25 @@ export class PostService {
     });
     return newPost.save();
   }
-  
-  
 
   async findAll(user: any): Promise<Post[]> {
     return this.postModel.find({ user: user._id }).sort({ createdAt: -1 });
   }
-  
 
   async findOne(id: string, user: any): Promise<Post> {
     return this.postModel.findOne({ _id: id, user: user._id });
   }
 
-  async update(id: string, updatePostDto: UpdatePostDto, user: any): Promise<Post> {
-    return this.postModel.findOneAndUpdate({ _id: id, user: user._id }, updatePostDto, { new: true });
+  async update(
+    id: string,
+    updatePostDto: UpdatePostDto,
+    user: any,
+  ): Promise<Post> {
+    return this.postModel.findOneAndUpdate(
+      { _id: id, user: user._id },
+      updatePostDto,
+      { new: true },
+    );
   }
 
   async remove(id: string, user: any): Promise<any> {
