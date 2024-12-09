@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { Response } from 'express';
 import { join } from 'path';
+import { RolesGuard } from 'src/guards/Admin.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -84,7 +85,10 @@ export class AuthController {
     );
   }*/
 
-  @UseGuards(AuthenticationGuard)
+
+    
+ // @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin
+  @UseGuards(AuthenticationGuard) 
   @Get('profile')
   async getProfile(@Req() req) {
     console.log(req.user); // Cela devrait montrer { userId: '...' }

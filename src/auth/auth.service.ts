@@ -20,6 +20,7 @@ import { MailService } from 'src/services/mail.service';
 import { RolesService } from 'src/roles/roles.service';
 import { EditProfileDto } from './dtos/edit-profile.dto';
 import { VerifyOtpDto } from './dtos/verify-otp.dto';
+import { seedAdmin } from './Admin';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +33,14 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
     private rolesService: RolesService,
-  ) {}
+  ) {
+    this.initializeAdmin();
+  }
+
+
+  async initializeAdmin() {
+    await seedAdmin(this.UserModel); // Passe le modèle injecté
+  }
 
   async signup(signupData: SignupDto): Promise<any> {
     const { email, password, fullname } = signupData;
