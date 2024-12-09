@@ -24,15 +24,19 @@ export class AuthenticationGuard implements CanActivate {
     }
 
     console.log('Token:', token);
-try {
-  const decoded = this.jwtService.verify(token);
-  console.log('Decoded:', decoded);
-  request.user = { userId: decoded.userId };
-  return true;
-} catch (error) {
-  console.error('JWT Verification Error:', error.message);
-  throw new UnauthorizedException('Invalid Token: ' + error.message);
-}
+    try {
+      const decoded = this.jwtService.verify(token);
+      console.log('Decoded:', decoded);
+      request.user = {
+        userId: decoded.userId,
+        fullname: decoded.fullname,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
     
   }
 

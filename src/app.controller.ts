@@ -4,9 +4,8 @@ import { AuthenticationGuard } from './guards/authentication.guard';
 import { Permissions } from './decorators/permissions.decorator';
 import { Resource } from './roles/enums/resource.enum';
 import { Action } from './roles/enums/action.enum';
-import { AuthorizationGuard } from './guards/authorization.guard';
 
-@UseGuards(AuthenticationGuard, AuthorizationGuard)
+@UseGuards(AuthenticationGuard)
 
 @Controller('/products')
 export class AppController {

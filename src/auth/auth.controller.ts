@@ -181,4 +181,18 @@ export class AuthController {
 
     return res.sendFile(imagePath);
   }
+
+
+  @UseGuards(AuthenticationGuard)
+@Get('user/:id')
+async getUserById(@Param('id') userId: string) {
+  return this.authService.getUserById(userId);
+}
+
+@UseGuards(new RolesGuard(['admin']))
+@UseGuards(AuthenticationGuard)
+@Get('users')
+async getAllUsers() {
+  return this.authService.getAllUsers();
+}
 }

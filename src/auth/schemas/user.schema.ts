@@ -3,9 +3,6 @@ import { Document, SchemaTypes, Types } from 'mongoose';
 
 @Schema()
 export class User extends Document {
-  findOne(arg0: { email: string; }) {
-      throw new Error('Method not implemented.');
-  }
   @Prop({ required: true })
   fullname: string;
 
@@ -15,10 +12,8 @@ export class User extends Document {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ required: false, type: SchemaTypes.ObjectId })
-  roleId: Types.ObjectId;
 
-  @Prop({ default: 'user', enum: ['user', 'admin'] }) 
+   @Prop({ default: 'user', enum: ['user', 'admin'] }) // Rôle par défaut
   role: string;
 
   @Prop()

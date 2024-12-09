@@ -135,10 +135,13 @@ export class AuthService {
 
     // If password matches and email is verified, proceed with generating tokens or whatever the next step is
     // Generate JWT tokens or perform other sign-in logic
-    const tokens = await this.generateUserTokens(user._id);
+    const tokens = await this.generateUserTokens(user);
     return {
       ...tokens,
       userId: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role
     };
   }
 
@@ -216,14 +219,25 @@ export class AuthService {
     if (!token) {
       throw new UnauthorizedException('Refresh Token is invalid');
     }
-    return this.generateUserTokens(token.userId);
-  }
+      const user = await this.UserModel.findById(token.userId);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+    
+      return this.generateUserTokens(user);
+    }
 
-  async generateUserTokens(userId) {
-    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '10h' });
+  async generateUserTokens(user:User) {
+    const payload = {
+      userId: user._id.toString(),
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role, // Assurez-vous que `roleId` correspond bien au rôle
+    };
+    const accessToken = this.jwtService.sign( payload , { expiresIn: '10h' });
     const refreshToken = uuidv4();
 
-    await this.storeRefreshToken(refreshToken, userId);
+    await this.storeRefreshToken(refreshToken, user._id.toString());
     return {
       accessToken,
       refreshToken,
@@ -244,14 +258,7 @@ export class AuthService {
     );
   }
 
-  async getUserPermissions(userId: string) {
-    const user = await this.UserModel.findById(userId);
-
-    if (!user) throw new BadRequestException();
-
-    const role = await this.rolesService.getRoleById(user.roleId.toString());
-    return role.permissions;
-  }
+  
 
   async getUserProfile(userId: string) {
     const user = await this.UserModel.findById(userId).select(
@@ -347,5 +354,20 @@ export class AuthService {
     await user.save();
 
     return { message: 'Your password has been successfully reset.' };
+  }
+
+
+
+  async getUserById(userId: string): Promise<User> {
+    const user = await this.UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const users = await this.UserModel.find();
+    return users;
   }
 }
