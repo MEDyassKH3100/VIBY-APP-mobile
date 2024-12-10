@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post } from './entities/post.entity';
@@ -65,4 +65,18 @@ export class PostService {
     return this.postModel.countDocuments().exec();
   }
 
+  // Supprimer un post spécifique par ID
+  async deleteOnePost(postId: string): Promise<{ message: string }> {
+    const deletedPost = await this.postModel.findByIdAndDelete(postId).exec();
+    if (!deletedPost) {
+      throw new NotFoundException(`Post with ID ${postId} not found.`);
+    }
+    return { message: `Post with ID ${postId} has been deleted.` };
+  }
+
+  // Supprimer tous les posts
+  async deleteAllPosts(): Promise<{ deletedCount: number }> {
+    const result = await this.postModel.deleteMany().exec();
+    return { deletedCount: result.deletedCount };
+  }
 }

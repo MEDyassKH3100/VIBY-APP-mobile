@@ -27,6 +27,22 @@ export class CommentaireController {
     return { totalComments };
   }
 
+  // Supprimer un commentaire spécifique (réservé aux admins)
+  @UseGuards(new RolesGuard(['admin']))
+  @Delete('delete/:id')
+  async deleteOneComment(
+    @Param('id') id: string,
+  ): Promise<{ message: string }> {
+    return this.commentaireService.deleteOneComment(id);
+  }
+
+  // Supprimer tous les commentaires (réservé aux admins)
+  @UseGuards(new RolesGuard(['admin']))
+  @Delete('delete-all')
+  async deleteAllComments(): Promise<{ deletedCount: number }> {
+    return this.commentaireService.deleteAllComments();
+  }
+
   @Post(':postId')
   async addCommentaire(
     @Param('postId') postId: string,

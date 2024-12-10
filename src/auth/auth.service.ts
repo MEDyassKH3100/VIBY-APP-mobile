@@ -37,7 +37,6 @@ export class AuthService {
     this.initializeAdmin();
   }
 
-
   async initializeAdmin() {
     await seedAdmin(this.UserModel); // Passe le modèle injecté
   }
@@ -106,7 +105,6 @@ export class AuthService {
               <body>
                 <h1 class="verified">Email Verified Successfully!</h1>
                 <p class="info">You can now continue using the application.</p>
-                <a href="http://yourapp.com/signin" class="button">Sign In</a>
               </body>
             </html>`;
   }
@@ -143,7 +141,7 @@ export class AuthService {
       userId: user._id,
       fullname: user.fullname,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
   }
 
@@ -154,7 +152,6 @@ export class AuthService {
       throw new NotFoundException('User not found...');
     }
 
-    
     //Compare the old password with the password in DB
     const passwordMatch = await bcrypt.compare(oldPassword, user.password);
     if (!passwordMatch) {
@@ -176,22 +173,22 @@ export class AuthService {
     if (!token) {
       throw new UnauthorizedException('Refresh Token is invalid');
     }
-      const user = await this.UserModel.findById(token.userId);
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-    
-      return this.generateUserTokens(user);
+    const user = await this.UserModel.findById(token.userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
     }
 
-  async generateUserTokens(user:User) {
+    return this.generateUserTokens(user);
+  }
+
+  async generateUserTokens(user: User) {
     const payload = {
       userId: user._id.toString(),
       fullname: user.fullname,
       email: user.email,
       role: user.role, // Assurez-vous que `roleId` correspond bien au rôle
     };
-    const accessToken = this.jwtService.sign( payload , { expiresIn: '10h' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '10h' });
     const refreshToken = uuidv4();
 
     await this.storeRefreshToken(refreshToken, user._id.toString());
@@ -214,8 +211,6 @@ export class AuthService {
       },
     );
   }
-
-  
 
   async getUserProfile(userId: string) {
     const user = await this.UserModel.findById(userId).select(
@@ -313,8 +308,7 @@ export class AuthService {
     return { message: 'Your password has been successfully reset.' };
   }
 
-
-
+  // Afficher un USER By ID
   async getUserById(userId: string): Promise<User> {
     const user = await this.UserModel.findById(userId);
     if (!user) {
@@ -328,17 +322,15 @@ export class AuthService {
     return users;
   }
 
-
-   // Bannir un commercial
-   async banUser(userId: string): Promise<User> {
-    const user = await this.UserModel
-      .findOne({ _id: userId, role: 'user' })
-      .exec();
+  // Bannir un USER
+  async banUser(userId: string): Promise<User> {
+    const user = await this.UserModel.findOne({
+      _id: userId,
+      role: 'user',
+    }).exec();
 
     if (!user) {
-      throw new NotFoundException(
-        `User avec l'ID "${userId}" introuvable`,
-      );
+      throw new NotFoundException(`User avec l'ID "${userId}" introuvable`);
     }
 
     if (user.isBanned) {
@@ -351,28 +343,40 @@ export class AuthService {
     return user;
   }
 
-  // Active un commercial
+  // Active un USER
   async ActiveUser(userId: string): Promise<User> {
-    const user = await this.UserModel
-      .findOne({ _id: userId, role: 'user' })
-      .exec();
+    const user = await this.UserModel.findOne({
+      _id: userId,
+      role: 'user',
+    }).exec();
 
     if (!user) {
-      throw new NotFoundException(
-        `User avec l'ID "${userId}" introuvable`,
-      );
+      throw new NotFoundException(`User avec l'ID "${userId}" introuvable`);
     }
 
-    user.isBanned = false; 
+    user.isBanned = false;
     await user.save();
 
     return user;
   }
 
+  // Méthode pour obtenir le total des utilisateurs
+  async getTotalUsers(): Promise<number> {
+    return this.UserModel.countDocuments().exec();
+  }
 
- // Méthode pour obtenir le total des utilisateurs
- async getTotalUsers(): Promise<number> {
-  return this.UserModel.countDocuments().exec();
-}
-
+    // Supprimer un utilisateur spécifique par ID
+    async deleteOneUser(userId: string): Promise<{ message: string }> {
+      const deletedUser = await this.UserModel.findByIdAndDelete(userId).exec();
+      if (!deletedUser) {
+        throw new NotFoundException(`User with ID ${userId} not found.`);
+      }
+      return { message: `User with ID ${userId} has been deleted.` };
+    }
+  
+    // Supprimer tous les utilisateurs
+    async deleteAllUsers(): Promise<{ deletedCount: number }> {
+      const result = await this.UserModel.deleteMany().exec();
+      return { deletedCount: result.deletedCount };
+    }
 }

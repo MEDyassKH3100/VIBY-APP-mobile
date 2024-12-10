@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dtos/signup.dto';
@@ -34,6 +35,20 @@ import { RolesGuard } from 'src/guards/Admin.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+    // Supprimer un utilisateur spécifique (réservé aux admins)
+    @UseGuards(new RolesGuard(['admin']))
+    @Delete('user/:id')
+    async deleteOneUser(@Param('id') id: string): Promise<{ message: string }> {
+      return this.authService.deleteOneUser(id);
+    }
+  
+    // Supprimer tous les utilisateurs (réservé aux admins)
+    @UseGuards(new RolesGuard(['admin']))
+    @Delete('delete-all')
+    async deleteAllUsers(): Promise<{ deletedCount: number }> {
+      return this.authService.deleteAllUsers();
+    }
 
   @Post('signup')
   async signUp(@Body() signupData: SignupDto) {
@@ -71,7 +86,6 @@ export class AuthController {
     );
   }
 
-  // @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin
   @UseGuards(AuthenticationGuard)
   @Get('profile')
   async getProfile(@Req() req) {
@@ -102,6 +116,8 @@ export class AuthController {
       },
     }),
   )
+
+  //Update Profile
   @UseGuards(AuthenticationGuard)
   @Put('profile')
   async updateProfile(
@@ -147,6 +163,8 @@ export class AuthController {
       resetPasswordDto.newPassword,
     );
   }
+
+  //Afficher Image Profile
   @UseGuards(AuthenticationGuard)
   @Get('profile-image')
   async getProfileImage(@Req() req, @Res() res: Response) {
@@ -201,4 +219,7 @@ export class AuthController {
     const totalUsers = await this.authService.getTotalUsers();
     return { totalUsers };
   }
+
+
 }
+// @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin

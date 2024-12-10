@@ -28,11 +28,27 @@ import { RolesGuard } from 'src/guards/Admin.guard';
 @Controller('posts')
 export class PostController {
   constructor(private readonly postsService: PostService) {}
+
+  // Total Posts (réservé aux admins)
   @UseGuards(new RolesGuard(['admin']))
   @Get('total')
   async getTotalPosts(): Promise<{ totalPosts: number }> {
     const totalPosts = await this.postsService.getTotalPosts();
     return { totalPosts };
+  }
+
+  // Supprimer un post spécifique (réservé aux admins)
+  @UseGuards(new RolesGuard(['admin']))
+  @Delete('delete/:id')
+  async deleteOnePost(@Param('id') id: string): Promise<{ message: string }> {
+    return this.postsService.deleteOnePost(id);
+  }
+
+  // Supprimer tous les posts (réservé aux admins)
+  @UseGuards(new RolesGuard(['admin']))
+  @Delete('delete-all')
+  async deleteAllPosts(): Promise<{ deletedCount: number }> {
+    return this.postsService.deleteAllPosts();
   }
 
   @Post()

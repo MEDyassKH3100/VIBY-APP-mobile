@@ -142,4 +142,19 @@ async getTotalComments(): Promise<number> {
   return this.commentaireModel.countDocuments().exec();
 }
 
+// Supprimer un commentaire spécifique par ID
+async deleteOneComment(commentId: string): Promise<{ message: string }> {
+  const deletedComment = await this.commentaireModel.findByIdAndDelete(commentId).exec();
+  if (!deletedComment) {
+    throw new NotFoundException(`Comment with ID ${commentId} not found.`);
+  }
+  return { message: `Comment with ID ${commentId} has been deleted.` };
+}
+
+// Supprimer tous les commentaires
+async deleteAllComments(): Promise<{ deletedCount: number }> {
+  const result = await this.commentaireModel.deleteMany().exec();
+  return { deletedCount: result.deletedCount };
+}
+
 }
