@@ -71,21 +71,6 @@ export class AuthController {
     );
   }
 
-  /*@Post('forgot-password')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto.email);
-  }*/
-
-  /* @Put('reset-password')
-  async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ) {
-    return this.authService.resetPassword(
-      resetPasswordDto.newPassword,
-      resetPasswordDto.resetToken,
-    );
-  }*/
-
   // @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin
   @UseGuards(AuthenticationGuard)
   @Get('profile')
@@ -207,5 +192,13 @@ export class AuthController {
   @Patch('Active-USER/:id')
   async ActiveCommercial(@Param('id') userId: string) {
     return this.authService.ActiveUser(userId);
+  }
+
+  @UseGuards(new RolesGuard(['admin']))
+  @UseGuards(AuthenticationGuard)
+  @Get('total')
+  async getTotalUsers(): Promise<{ totalUsers: number }> {
+    const totalUsers = await this.authService.getTotalUsers();
+    return { totalUsers };
   }
 }

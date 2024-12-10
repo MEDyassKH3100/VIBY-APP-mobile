@@ -167,52 +167,6 @@ export class AuthService {
     await user.save();
   }
 
-  /*
-
-  async forgotPassword(email: string) {
-    //Check that user exists
-    const user = await this.UserModel.findOne({ email });
-
-    if (user) {
-      //If user exists, generate password reset link
-      const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 1);
-
-      const resetToken = nanoid(64);
-      await this.ResetTokenModel.create({
-        token: resetToken,
-        userId: user._id,
-        expiryDate,
-      });
-      //Send the link to the user by email
-      this.mailService.sendPasswordResetEmail(email, resetToken);
-    }
-
-    return { message: 'If this user exists, they will receive an email' };
-  }
-
-  async resetPassword(newPassword: string, resetToken: string) {
-    //Find a valid reset token document
-    const token = await this.ResetTokenModel.findOneAndDelete({
-      token: resetToken,
-      expiryDate: { $gte: new Date() },
-    });
-
-    if (!token) {
-      throw new UnauthorizedException('Invalid link');
-    }
-    
-
-    //Change user password (MAKE SURE TO HASH!!)
-    const user = await this.UserModel.findById(token.userId);
-    if (!user) {
-      throw new InternalServerErrorException();
-    }
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-  }
-*/
   async refreshTokens(refreshToken: string) {
     const token = await this.RefreshTokenModel.findOne({
       token: refreshToken,
@@ -414,4 +368,11 @@ export class AuthService {
 
     return user;
   }
+
+
+ // Méthode pour obtenir le total des utilisateurs
+ async getTotalUsers(): Promise<number> {
+  return this.UserModel.countDocuments().exec();
+}
+
 }

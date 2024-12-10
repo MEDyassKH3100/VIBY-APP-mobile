@@ -136,4 +136,10 @@ export class CommentaireService {
     await this.commentaireModel.deleteMany({ post: postId });
     return { message: 'Tous les commentaires ont été supprimés avec succès.' };
   }
+
+// Méthode pour obtenir le total des commentaires
+async getTotalComments(): Promise<number> {
+  return this.commentaireModel.countDocuments().exec();
+}
+
 }

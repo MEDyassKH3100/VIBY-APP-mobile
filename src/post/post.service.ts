@@ -59,4 +59,10 @@ export class PostService {
     const result = await this.postModel.deleteMany({ user: user._id });
     return { deletedCount: result.deletedCount };
   }
+
+  // Méthode pour obtenir le total des posts
+  async getTotalPosts(): Promise<number> {
+    return this.postModel.countDocuments().exec();
+  }
+
 }

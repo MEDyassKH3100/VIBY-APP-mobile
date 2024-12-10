@@ -13,11 +13,19 @@ import { CommentaireService } from './commentaire.service';
 import { CreateCommentaireDto } from './dto/create-commentaire.dto';
 import { UpdateCommentaireDto } from './dto/update-commentaire.dto';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
+import { RolesGuard } from 'src/guards/Admin.guard';
 
 @Controller('comments')
 @UseGuards(AuthenticationGuard) // Vérifie que l'utilisateur est connecté
 export class CommentaireController {
   constructor(private readonly commentaireService: CommentaireService) {}
+
+  @UseGuards(new RolesGuard(['admin']))
+  @Get('total')
+  async getTotalComments(): Promise<{ totalComments: number }> {
+    const totalComments = await this.commentaireService.getTotalComments();
+    return { totalComments };
+  }
 
   @Post(':postId')
   async addCommentaire(
@@ -25,7 +33,11 @@ export class CommentaireController {
     @Body() createCommentaireDto: CreateCommentaireDto,
     @Req() req: any,
   ) {
-    return this.commentaireService.addCommentaire(postId, createCommentaireDto, req.user);
+    return this.commentaireService.addCommentaire(
+      postId,
+      createCommentaireDto,
+      req.user,
+    );
   }
 
   @Get(':id')
