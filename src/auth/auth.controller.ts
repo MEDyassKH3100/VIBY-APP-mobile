@@ -13,6 +13,7 @@ import {
   UnauthorizedException,
   UseGuards,
   UseInterceptors,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dtos/signup.dto';
@@ -85,10 +86,8 @@ export class AuthController {
     );
   }*/
 
-
-    
- // @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin
-  @UseGuards(AuthenticationGuard) 
+  // @UseGuards(new RolesGuard(['admin']))  //pour l'accés de l'admin
+  @UseGuards(AuthenticationGuard)
   @Get('profile')
   async getProfile(@Req() req) {
     console.log(req.user); // Cela devrait montrer { userId: '...' }
@@ -182,17 +181,31 @@ export class AuthController {
     return res.sendFile(imagePath);
   }
 
-
+  //afficher un USER par son ID
   @UseGuards(AuthenticationGuard)
-@Get('user/:id')
-async getUserById(@Param('id') userId: string) {
-  return this.authService.getUserById(userId);
-}
-
-@UseGuards(new RolesGuard(['admin']))
-@UseGuards(AuthenticationGuard)
-@Get('users')
-async getAllUsers() {
-  return this.authService.getAllUsers();
-}
+  @Get('user/:id')
+  async getUserById(@Param('id') userId: string) {
+    return this.authService.getUserById(userId);
+  }
+  //afficher tous les USERS
+  @UseGuards(new RolesGuard(['admin']))
+  @UseGuards(AuthenticationGuard)
+  @Get('users')
+  async getAllUsers() {
+    return this.authService.getAllUsers();
+  }
+  //Bannir USER
+  @UseGuards(new RolesGuard(['admin']))
+  @UseGuards(AuthenticationGuard)
+  @Patch('ban-USER/:id')
+  async banCommercial(@Param('id') userId: string) {
+    return this.authService.banUser(userId);
+  }
+  // Acitivate USER
+  @UseGuards(new RolesGuard(['admin']))
+  @UseGuards(AuthenticationGuard)
+  @Patch('Active-USER/:id')
+  async ActiveCommercial(@Param('id') userId: string) {
+    return this.authService.ActiveUser(userId);
+  }
 }

@@ -36,7 +36,8 @@ export class User extends Document {
   isVerified: boolean;
   @Prop()
   image : string
-  
+  @Prop({ default: false })
+  isBanned: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

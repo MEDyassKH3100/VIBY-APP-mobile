@@ -126,7 +126,9 @@ export class AuthService {
         'Email has not been verified. Please check your email to verify your account.',
       );
     }
-
+    if (user.isBanned) {
+      throw new UnauthorizedException('Votre compte a été banni');
+    }
     // Compare entered password with existing password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
@@ -152,6 +154,7 @@ export class AuthService {
       throw new NotFoundException('User not found...');
     }
 
+    
     //Compare the old password with the password in DB
     const passwordMatch = await bcrypt.compare(oldPassword, user.password);
     if (!passwordMatch) {
@@ -369,5 +372,46 @@ export class AuthService {
   async getAllUsers(): Promise<User[]> {
     const users = await this.UserModel.find();
     return users;
+  }
+
+
+   // Bannir un commercial
+   async banUser(userId: string): Promise<User> {
+    const user = await this.UserModel
+      .findOne({ _id: userId, role: 'user' })
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(
+        `User avec l'ID "${userId}" introuvable`,
+      );
+    }
+
+    if (user.isBanned) {
+      throw new BadRequestException(`Le User est déjà banni`);
+    }
+
+    user.isBanned = true; // Mise à jour de l'état de bannissement
+    await user.save();
+
+    return user;
+  }
+
+  // Active un commercial
+  async ActiveUser(userId: string): Promise<User> {
+    const user = await this.UserModel
+      .findOne({ _id: userId, role: 'user' })
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException(
+        `User avec l'ID "${userId}" introuvable`,
+      );
+    }
+
+    user.isBanned = false; 
+    await user.save();
+
+    return user;
   }
 }
