@@ -38,13 +38,15 @@ export class AuthController {
 
     // Supprimer un utilisateur spécifique (réservé aux admins)
     @UseGuards(new RolesGuard(['admin']))
-    @Delete('user/:id')
+    @UseGuards(AuthenticationGuard)
+    @Delete('delete/:id')
     async deleteOneUser(@Param('id') id: string): Promise<{ message: string }> {
       return this.authService.deleteOneUser(id);
     }
   
     // Supprimer tous les utilisateurs (réservé aux admins)
     @UseGuards(new RolesGuard(['admin']))
+    @UseGuards(AuthenticationGuard)
     @Delete('delete-all')
     async deleteAllUsers(): Promise<{ deletedCount: number }> {
       return this.authService.deleteAllUsers();

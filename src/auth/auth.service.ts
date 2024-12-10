@@ -376,7 +376,7 @@ export class AuthService {
   
     // Supprimer tous les utilisateurs
     async deleteAllUsers(): Promise<{ deletedCount: number }> {
-      const result = await this.UserModel.deleteMany().exec();
+      const result = await this.UserModel.deleteMany({ role: 'user' }).exec();
       return { deletedCount: result.deletedCount };
     }
 }
