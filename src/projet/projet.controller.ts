@@ -49,10 +49,12 @@ export class ProjetController {
     );
   }
   @Patch(':id')
-  updateProjet(
+  async updateProjet(
     @Param('id') projetId: string,
     @Body() updateProjetDto: UpdateProjetDto,
+    @Req() req: any, // Récupérer l'utilisateur connecté
   ) {
-    return this.projetService.updateProjet(projetId, updateProjetDto);
+    const userId = req.user.userId; // ID de l'utilisateur connecté
+    return this.projetService.updateProjet(projetId, updateProjetDto, userId);
   }
 }
