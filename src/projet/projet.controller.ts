@@ -49,6 +49,11 @@ export class ProjetController {
     //console.log('Created Projet:', result); // Affiche le projet créé
     return result;
   }
+  @Get('total-Projects')
+  async getTotalProjects(): Promise<{ totalProjects: number }> {
+    const totalProjects = await this.projetService.getTotalProjects();
+    return { totalProjects };
+  }
 
   @Patch(':id/collaborators')
   async addCollaborators(
@@ -117,5 +122,37 @@ export class ProjetController {
   ) {
     const userId = req.user.userId; // ID de l'utilisateur connecté
     return this.projetService.deleteProjectById(projetId, userId);
+  }
+
+  @Get('my-projects/total')
+  async getTotalMyProjects(@Req() req: any) {
+    const userId = req.user.userId;
+    return {
+      totalMyProjects: await this.projetService.getTotalMyProjects(userId),
+    };
+  }
+
+  @Get('my-collaborators/total')
+  async getTotalCollaborators(@Req() req: any) {
+    const userId = req.user.userId;
+    return {
+      totalCollaborators: await this.projetService.getTotalCollaborators(
+        userId,
+      ),
+    };
+  }
+
+  @Delete(':id/collaborators/:collaboratorId')
+  async deleteCollaborator(
+    @Param('id', ParseObjectIdPipe) projetId: string,
+    @Param('collaboratorId', ParseObjectIdPipe) collaboratorId: string,
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId;
+    return this.projetService.deleteCollaborator(
+      projetId,
+      collaboratorId,
+      userId,
+    );
   }
 }

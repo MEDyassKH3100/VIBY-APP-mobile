@@ -79,4 +79,7 @@ export class PostService {
     const result = await this.postModel.deleteMany().exec();
     return { deletedCount: result.deletedCount };
   }
+
+
+  
 }

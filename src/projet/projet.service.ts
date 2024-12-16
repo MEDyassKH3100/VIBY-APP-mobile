@@ -162,10 +162,6 @@ export class ProjetService {
       .populate({
         path: 'collaborators',
         select: 'fullname email', // Inclure les champs pertinents des collaborateurs
-      })
-      .populate({
-        path: 'mediaFiles',
-        select: 'url title description', // Exemple pour inclure les médias
       });
 
     if (!projet) {
@@ -233,7 +229,6 @@ export class ProjetService {
       });
   }
 
-
   async getAllProjectsByUserId(userId: string) {
     return this.projetModel
       .find({
@@ -246,48 +241,86 @@ export class ProjetService {
       .populate({
         path: 'collaborators',
         select: 'fullname email', // Inclure les informations des collaborateurs
-      })
-      
+      });
   }
-  
+
   async deleteProjectById(projetId: string, userId: string) {
     // Vérifier si le projet existe et que l'utilisateur est le propriétaire
     const projet = await this.projetModel.findById(projetId);
-  
+
     if (!projet) {
       throw new Error('Project not found');
     }
-  
+
     if (projet.owner.toString() !== userId) {
       throw new Error('You are not authorized to delete this project');
     }
-  
+
     // Supprimer le projet
     await this.projetModel.findByIdAndDelete(projetId);
-  
+
     return { message: 'Project successfully deleted' };
   }
 
   async deleteAllMyProjects(userId: string) {
     // Supprimer tous les projets dont l'utilisateur est propriétaire
     const result = await this.projetModel.deleteMany({ owner: userId });
-  
+
     return {
       message: 'All your projects have been deleted',
       deletedCount: result.deletedCount, // Nombre de projets supprimés
     };
   }
-  
 
+  // Méthode pour obtenir le nombre total de projets
+  async getTotalProjects(): Promise<number> {
+    return this.projetModel.countDocuments().exec(); // Compter tous les projets
+  }
+
+  // Méthode pour obtenir le nombre total de projets d'un utilisateur (uniquement pour le propriétaire)
+  async getTotalMyProjects(userId: string) {
+    return this.projetModel.countDocuments({ owner: userId });
+  }
+
+  // Méthode pour obtenir le nombre total de collaborateurs d'un utilisateur (uniquement pour le propriétaire)
+  async getTotalCollaborators(userId: string) {
+    const projects = await this.projetModel.find({ owner: userId });
+    const collaboratorsSet = new Set();
+
+    // Collecter tous les collaborateurs sans duplication
+    projects.forEach((project) => {
+      project.collaborators.forEach((collaborator) =>
+        collaboratorsSet.add(collaborator.toString()),
+      );
+    });
+
+    return collaboratorsSet.size; // Retourner la taille du set
+  }
+
+  // Méthode pour supprimer un collaborateur d'un projet (uniquement pour le propriétaire)
+  async deleteCollaborator(
+    projetId: string,
+    collaboratorId: string,
+    userId: string,
+  ) {
+    const project = await this.projetModel.findById(projetId);
+
+    if (!project) {
+      throw new NotFoundException('Projet non trouvé');
+    }
+
+    if (project.owner.toString() !== userId) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas autorisé à modifier ce projet",
+      );
+    }
+
+    project.collaborators = project.collaborators.filter(
+      (collaborator) => collaborator.toString() !== collaboratorId,
+    );
+
+    await project.save();
+
+    return { message: 'Collaborateur supprimé avec succès' };
+  }
 }
-
-//GET PROJECT BY ID
-//GET ALL PROJECTS
-//GET MY PROJECT BY ID (owner && collaborators)
-//GET ALL MY PROJECT (owner && collaborators)
-//GET ALL MY PROJECTS BY THEME (owner && collaborators)
-//GET ALL PROJECTS BY THEME
-//GET ALL PROJECTS BY USER ID
-// GET TOTAL PROJECTS
-// PUBLISH PROJECT (owner)
-// PRIVATIZE PROJECT (owner)

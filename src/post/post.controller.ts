@@ -29,6 +29,13 @@ import { RolesGuard } from 'src/guards/Admin.guard';
 export class PostController {
   constructor(private readonly postsService: PostService) {}
 
+  
+  // Route pour afficher tous les posts de la base de données
+  @Get('all')
+  async findAllPublic() {
+    const posts = await this.postsService.findAllPublic();
+    return posts;
+  }
   // Total Posts (réservé aux admins)
   @UseGuards(new RolesGuard(['admin']))
   @Get('total')
@@ -105,12 +112,6 @@ export class PostController {
     return post;
   }
 
-  // Route pour afficher tous les posts de la base de données
-  @Get('all')
-  async findAllPublic() {
-    const posts = await this.postsService.findAllPublic();
-    return posts;
-  }
 
   // Route pour afficher un post spécifique par son ID
   @Get(':id')
