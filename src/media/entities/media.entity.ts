@@ -5,11 +5,8 @@ import { Projet } from 'src/projet/entities/projet.entity';
 
 @Schema({ timestamps: true })
 export class Media extends Document {
-  @Prop()
+  @Prop({ required: false })
   name: string; // Nom du fichier media
-
-  @Prop()
-  content: string; // Contenu ou chemin vers le fichier média
 
   @Prop({ required: true })
   path: string; // Chemin du fichier sur le serveur ou stockage

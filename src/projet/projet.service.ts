@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Projet } from './entities/projet.entity';
 import { CreateProjetDto } from './dto/create-projet.dto';
 import { AddCollaboratorsDto } from './dto/add-collaborators.dto';
@@ -323,4 +323,23 @@ export class ProjetService {
 
     return { message: 'Collaborateur supprimé avec succès' };
   }
+
+
+  async findById(projetId: string) {
+    return this.projetModel.findById(projetId).exec();
+  }
+  
+  async updateMediaFiles(projetId: string, mediaId: Types.ObjectId): Promise<void> {
+    const projet = await this.projetModel.findById(projetId);
+    if (!projet) {
+      throw new NotFoundException('Projet non trouvé');
+    }
+  
+    // Vérifier et ajouter l'ID dans le tableau
+    if (!projet.mediaFiles.some((id) => id.equals(mediaId))) {
+      projet.mediaFiles.push(mediaId);
+      await projet.save();
+    }
+  }
+
 }

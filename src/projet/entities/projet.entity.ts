@@ -27,10 +27,10 @@ export class Projet extends Document {
   collaborators: User[];
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Media' }], default: [] })
-  mediaFiles: Media[];
+  mediaFiles: Types.ObjectId[]; // Utiliser ObjectId ici
 
   @Prop({ default: false })
-  isPublic: boolean; 
+  isPublic: boolean;
 
   @Prop({ required: true, enum: ProjetTheme })
   theme: ProjetTheme; // Thème du projet lié à la musique
