@@ -97,4 +97,10 @@ serveFile(@Param('filename') filename: string, @Res() res) {
   const filePath = join(process.cwd(), 'uploads', 'media', filename);
   return res.sendFile(filePath);
 }
+
+@Get('total-MediaFiles')
+  async getTotalMediaFiles(): Promise<{ totalMediaFiles: number }> {
+    const totalMediaFiles = await this.mediaService.getTotalMediaFiles();
+    return { totalMediaFiles };
+  }
 }

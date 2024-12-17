@@ -14,4 +14,8 @@ export class MediaService {
     const createdMedia = new this.mediaModel(addMediaDto);
     return await createdMedia.save();
   }
+
+  async getTotalMediaFiles(): Promise<number> {
+    return this.mediaModel.countDocuments().exec(); // Compter tous les projets
+  }
 }
