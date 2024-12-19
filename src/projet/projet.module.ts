@@ -16,10 +16,11 @@ import { AuthModule } from 'src/auth/auth.module'; // Import du module Auth si g
       { name: User.name, schema: UserSchema },
     ]),
     forwardRef(() => MediaModule),
-        AuthModule,  // Ajout du module Auth si nécessaire
+    AuthModule, // Ajout du module Auth si nécessaire
   ],
   controllers: [ProjetController],
   providers: [ProjetService],
-  exports: [ProjetService], // Export du service si utilisé ailleurs
+  exports: [ProjetService, MongooseModule],
+  // Export du service si utilisé ailleurs
 })
 export class ProjetModule {}

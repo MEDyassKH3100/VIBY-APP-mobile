@@ -342,4 +342,28 @@ export class ProjetService {
     }
   }
 
+  async removeMediaFromProjet(projetId: string, mediaId: string): Promise<Projet> {
+    // Vérifier si le projet existe
+    const projet = await this.projetModel.findById(projetId);
+    if (!projet) {
+      throw new NotFoundException('Projet introuvable');
+    }
+
+    // Vérifier si le média est dans le tableau des mediaFiles
+    const mediaIndex = projet.mediaFiles.findIndex(
+      (id) => id.toString() === mediaId,
+    );
+    if (mediaIndex === -1) {
+      throw new NotFoundException('Média non trouvé dans ce projet');
+    }
+
+    // Supprimer le média du tableau
+    projet.mediaFiles.splice(mediaIndex, 1);
+
+    // Sauvegarder les modifications
+    await projet.save();
+
+    return projet;
+  }
+
 }

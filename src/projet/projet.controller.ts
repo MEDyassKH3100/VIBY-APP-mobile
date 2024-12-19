@@ -8,6 +8,8 @@ import {
   Req,
   Get,
   Delete,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { ProjetService } from './projet.service';
 import { CreateProjetDto } from './dto/create-projet.dto';
@@ -154,5 +156,15 @@ export class ProjetController {
       collaboratorId,
       userId,
     );
+  }
+
+
+  @Delete(':projetId/media/:mediaId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeMediaFromProjet(
+    @Param('projetId') projetId: string,
+    @Param('mediaId') mediaId: string,
+  ): Promise<void> {
+    await this.projetService.removeMediaFromProjet(projetId, mediaId);
   }
 }

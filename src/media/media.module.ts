@@ -10,7 +10,7 @@ import { AuthModule } from 'src/auth/auth.module'; // Import du module Auth pour
   imports: [
     MongooseModule.forFeature([{ name: Media.name, schema: MediaSchema }]),
     forwardRef(() => ProjetModule), // Utilisez forwardRef pour éviter la boucle
-    AuthModule,   // Ajout du module Auth si nécessaire
+    AuthModule, // Ajout du module Auth si nécessaire
   ],
   controllers: [MediaController],
   providers: [MediaService],
